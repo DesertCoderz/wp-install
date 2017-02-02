@@ -13,9 +13,15 @@ class Setup {
         $this->config = $this->getCSV($argv[1]);
         $this->createVHost();
         $this->restartServer();
-
     }
 
+    private function restartServer() {
+        echo "Restarting Apache\n";
+        exec("/etc/init.d/apache2 restart",$error,$out);
+        if ($error)
+            echo $out;
+
+    }
     private function createVHost() {
         echo "Creating Virtual Host File\n";
 
@@ -31,7 +37,8 @@ class Setup {
         echo "Creating Symbolic Link\n";
 
         exec("ln -s $available_path$vhost_config_filename $enabled_path$vhost_config_filename",$error,$out);
-        print_r($out);
+        if ($error)
+            echo $out;
     }
 
     private function getCSV($filename) {
