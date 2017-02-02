@@ -1,0 +1,9 @@
+title,key,value
+Domain Name,domain_name,rspmedia.de
+Subdomain Name,subdomain_name,test
+Webmaster Email,webmaster_email,info@rspmedia.de
+Projektpfad,project_root,test
+Datenbank Name,db_name,test
+Datenbank Username,db_user,test
+Datenbank Passwort,db_password,test
+Datenbank Host,db_host,localhost
