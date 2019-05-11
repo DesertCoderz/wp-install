@@ -1,5 +1,0 @@
-title,key,value
-apache config path,apache_config_path,"/etc/apache2/"
-server type,server_type,"apache"
-MySQL root Username,db_root_user,root
-MySQL root Password,db_root_password,"H!4}S{6_9Lur?C3p"
