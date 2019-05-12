@@ -24,7 +24,7 @@
  */
 
 
-define('WP_MEMORY_LIMIT', '%MEMORY_LIMIT%');
+define('WP_MEMORY_LIMIT', ini_get( 'memory_limit' ));
 
 define('DB_NAME', '%DB_NAME%');
 
@@ -51,14 +51,14 @@ define('WP_SITEURL','http://' . '%DOMAIN_NAME%');
  *
  * @since 2.6.0
  */
-define('AUTH_KEY',         'f8e483a1c7a8613061e0052c7483a0e0');
-define('SECURE_AUTH_KEY',  'd9800b1efbd16ae24b3f8af7e0febc19');
-define('LOGGED_IN_KEY',    'aa894044a0634c5cf1ece763a20f3cfa');
-define('NONCE_KEY',        '5309e2bb54b3f825869639839699d36a');
-define('AUTH_SALT',        'db9ea5aea167a1f053f98795a1fcae39');
-define('SECURE_AUTH_SALT', '92d2a2b866208583ec700e635295d3fe');
-define('LOGGED_IN_SALT',   '0cfe7f9950c6bbf3a2ca4f8797714a1f');
-define('NONCE_SALT',       '13d37906ef04041826176676942a306c');
+define('AUTH_KEY',         '%AUTH_KEY%');
+define('SECURE_AUTH_KEY',  '%SECURE_AUTH_KEY%');
+define('LOGGED_IN_KEY',    '%LOGGED_IN_KEY%');
+define('NONCE_KEY',        '%NONCE_KEY%');
+define('AUTH_SALT',        '%AUTH_SALT%');
+define('SECURE_AUTH_SALT', '%SECURE_AUTH_SALT%');
+define('LOGGED_IN_SALT',   '%LOGGED_IN_SALT%');
+define('NONCE_SALT',       '%NONCE_SALT%');
 
 /**#@-*/
 
@@ -69,7 +69,7 @@ define('NONCE_SALT',       '13d37906ef04041826176676942a306c');
  * verschiedene WordPress-Installationen betreiben.
  * Bitte verwende nur Zahlen, Buchstaben und Unterstriche!
  */
-$table_prefix  = 'wp_';
+$table_prefix  = '%TABLE_PREFIX%';
 
 /**
  * Für Entwickler: Der WordPress-Debug-Modus.

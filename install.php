@@ -8,11 +8,22 @@ class Setup {
     private $os = PHP_OS;
 
     private $slug = '';
+    private $domain_name = '';
     private $download_path = __DIR__ . '/downloads';
     private $db_user = '';
     private $db_pass = '';
     private $db_name = '';
-    private $db_host = '';
+    private $db_host = 'localhost';
+    private $hashes = [
+        'AUTH_KEY',
+        'SECURE_AUTH_KEY',
+        'LOGGED_IN_KEY',
+        'NONCE_KEY',
+        'AUTH_SALT',
+        'SECURE_AUTH_SALT',
+        'LOGGED_IN_SALT',
+        'NONCE_SALT'
+    ];
 
     function __construct() {
 
@@ -34,7 +45,64 @@ class Setup {
         $this->clearDownloadFolder();
         $this->downloadWP();
         $this->unzipWP();
+        $this->createDatabase();
+        $this->makeWordPressConfig();
         $this->restartServer();
+    }
+
+    private function makeWordPressConfig() {
+
+        $wp_config = file_get_contents(__DIR__  . "/templates/wp-config.conf.txt");
+
+        foreach($this->hashes as $hash_name) {
+            $wp_config = str_replace("%$hash_name%", $this->generateRandomPassword(32,32) , $wp_config);
+        }
+
+        $wp_config = str_replace("%DB_USER%", $this->db_user, $wp_config);
+        $wp_config = str_replace("%DB_NAME%", $this->db_name, $wp_config);
+        $wp_config = str_replace("%DB_PASSWORD%", $this->db_pass, $wp_config);
+        $wp_config = str_replace("%DB_HOST%", $this->db_host, $wp_config);
+        $wp_config = str_replace("%DOMAIN_NAME%", $this->config['virtual_host']['domain_name'], $wp_config);
+
+        file_put_contents(__DIR__ . '/wp-config.php', $wp_config);
+    }
+
+    private function createDatabase() {
+        $this->db_pass = $this->generateRandomPassword(12,16);
+        $this->db_name = $this->slug . '_' .$this->createRandomNumber(6);
+        $this->db_user = $this->slug . $this->createRandomNumber(6);
+        $this->db_host = $this->config['database']['db_host'];
+
+        echo "Creating Database\n";
+
+        echo shell_exec('mysql -e "CREATE USER \'' . $this->db_user  . '\'@\''. $this->db_host .
+            '\' IDENTIFIED BY \'' . $this->db_pass . '\'" -h' .$this->db_host . ' 2>&1;');
+
+        echo shell_exec('mysql -e "GRANT ALL PRIVILEGES ON ' . $this->db_name . '.* TO \'' . $this->db_user .
+            '\'@\'' . $this->db_host . '\' WITH GRANT OPTION;" -h' .$this->db_host . ' 2>&1;');
+    }
+
+    private function createRandomNumber($desired_length) {
+
+        $number = '';
+
+        for($length = 0; $length < $desired_length; $length++) {
+            $number .= rand(0, 9);
+        }
+        return $number;
+    }
+
+    private function generateRandomPassword($start, $end) {
+
+        $password = '';
+
+        $desired_length = rand($start, $end);
+
+        for($length = 0; $length < $desired_length; $length++) {
+            $password .= chr(rand(32, 126));
+        }
+
+        return $password;
     }
 
     private function unzipWP() {
@@ -61,11 +129,19 @@ class Setup {
 
         $available_path = $this->local_config[$this->os]['apache_config_path'] . "/sites-available/";
         $enabled_path = $this->local_config[$this->os]['apache_config_path'] . "/sites-enabled/";
+
         $vhost_config_filename = $this->config['virtual_host']['domain_name'] . ".conf";
+
         $vhost_template = file_get_contents(__DIR__  . "/templates/vhost.template.conf");
-        $vhost_template = str_replace("%APACHE_DOC_ROOT%", $this->local_config[$this->os]['apache_doc_root'] , $vhost_template);
-        $vhost_template = str_replace("%DOMAIN_NAME%", $this->config['virtual_host']['domain_name'], $vhost_template);
-        $vhost_template = str_replace("%WEBMASTER_EMAIL%", $this->config['virtual_host']['webmaster_email'], $vhost_template);
+
+        $vhost_template = str_replace("%APACHE_DOC_ROOT%",
+            $this->local_config[$this->os]['apache_doc_root'] , $vhost_template);
+
+        $vhost_template = str_replace("%DOMAIN_NAME%",
+            $this->config['virtual_host']['domain_name'], $vhost_template);
+
+        $vhost_template = str_replace("%WEBMASTER_EMAIL%",
+            $this->config['virtual_host']['webmaster_email'], $vhost_template);
 
         file_put_contents($available_path . $vhost_config_filename, $vhost_template );
 
