@@ -36,9 +36,6 @@ define('DB_HOST', '%DB_HOST%');
 
 define('DB_CHARSET', 'utf8');
 
-define('WP_HOME','http://' . '%DOMAIN_NAME%');
-define('WP_SITEURL','http://' . '%DOMAIN_NAME%');
-
 /**#@+
  * Sicherheitsschlüssel
  *

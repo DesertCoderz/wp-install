@@ -8,6 +8,9 @@ class Setup {
     private $os = PHP_OS;
 
     private $slug = '';
+
+    private $target_path = '';
+    private $domain_name = '';
     private $download_path = __DIR__ . '/downloads';
     private $db_user = '';
     private $db_pass = '';
@@ -40,18 +43,37 @@ class Setup {
 
         $this->local_config = parse_ini_file(__DIR__ . "/config/config.local.ini", true);
         $this->config = parse_ini_file(__DIR__ . "/config/config.ini", true);
+
+        $this->doc_root = $this->local_config[$this->os]['apache_doc_root'];
+        $this->domain_name = $this->config['virtual_host']['domain_name'];
+        $this->target_path =  $this->doc_root . '/' . $this->domain_name;
+
+        $this->db_pass = $this->generateRandomPassword(12,16);
+        $this->db_name = $this->slug . '_' .$this->createRandomNumber(6);
+        $this->db_user = $this->slug . $this->createRandomNumber(6);
+        $this->db_host = $this->config['database']['db_host'];
+
+        echo "password: "  . $this->db_pass . "\n";
+        echo "password utf8: "  . utf8_encode($this->db_pass) . "\n";
+
         $this->createVHost();
         $this->clearDownloadFolder();
         $this->downloadWP();
         $this->unzipWP();
-        $this->createDatabase();
+        $this->createTargetPath();
+        // $this->createDatabase();
         $this->makeWordPressConfig();
         $this->restartServer();
     }
 
+    private function createTargetPath() {
+        echo "Creating Target Path\n";
+        echo shell_exec("cd $this->target_path 2>&1 && mkdir $this->domain_name 2>&1");
+    }
+
     private function makeWordPressConfig() {
 
-        $wp_config = file_get_contents(__DIR__  . "/templates/wp-config.conf.txt");
+        $wp_config = file_get_contents(__DIR__  . "/templates/wp-config.conf.txt" );
 
         foreach($this->hashes as $hash_name) {
             $wp_config = str_replace("%$hash_name%", $this->generateRandomPassword(32,32) , $wp_config);
@@ -61,16 +83,14 @@ class Setup {
         $wp_config = str_replace("%DB_NAME%", $this->db_name, $wp_config);
         $wp_config = str_replace("%DB_PASSWORD%", $this->db_pass, $wp_config);
         $wp_config = str_replace("%DB_HOST%", $this->db_host, $wp_config);
-        $wp_config = str_replace("%DOMAIN_NAME%", $this->config['virtual_host']['domain_name'], $wp_config);
+        $wp_config = str_replace("%TABLE_PREFIX%", $this->config['wordpress']['table_prefix'], $wp_config);
 
-        file_put_contents(__DIR__ . '/wp-config.php', $wp_config);
+        file_put_contents($this->target_path . '/'.$this->config['wordpress']['domain_name'] .
+            '/wp-config.php', $wp_config);
+
     }
 
     private function createDatabase() {
-        $this->db_pass = $this->generateRandomPassword(12,16);
-        $this->db_name = $this->slug . '_' .$this->createRandomNumber(6);
-        $this->db_user = $this->slug . $this->createRandomNumber(6);
-        $this->db_host = $this->config['database']['db_host'];
 
         echo "Creating Database\n";
 
@@ -100,7 +120,7 @@ class Setup {
         $desired_length = rand($start, $end);
 
         for($length = 0; $length < $desired_length; $length++) {
-            $password .= chr(rand(32, 126));
+            $password .= chr(rand(33, 126));
         }
 
         return $password;
@@ -121,7 +141,8 @@ class Setup {
     private function downloadWP() {
 
         echo "Downloading Wordpress\n";
-        echo shell_exec("wget -q -P $this->download_path http://de.wordpress.org/latest-de_DE.zip 2>&1;");
+        $download_url = $this->config['wordpress']['download_url'];
+        echo shell_exec("wget -q -P $this->download_path $download_url 2>&1;");
     }
 
     private function createVHost() {
@@ -131,7 +152,7 @@ class Setup {
         $available_path = $this->local_config[$this->os]['apache_config_path'] . "/sites-available/";
         $enabled_path = $this->local_config[$this->os]['apache_config_path'] . "/sites-enabled/";
 
-        $vhost_config_filename = $this->config['virtual_host']['domain_name'] . ".conf";
+        $vhost_config_filename = $this->domain_name . ".conf";
 
         $vhost_template = file_get_contents(__DIR__  . "/templates/vhost.template.conf");
 
