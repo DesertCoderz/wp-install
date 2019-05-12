@@ -33,7 +33,7 @@ class Setup {
 
         if (empty($_SERVER['argv'][1])) {
 
-            echo "Please enter the project's slug ";
+            echo "Please enter the project's slug as first parameter";
             $handle = fopen ("php://stdin","r");
             $line = fgets($handle);
             $this->slug = trim($line);
@@ -43,11 +43,23 @@ class Setup {
             $this->slug = $_SERVER['argv'][1];
         }
 
+        if (empty($_SERVER['argv'][2])) {
+
+            echo "Please enter the project's domain name as second parameter without protocoll (http://)";
+            $handle = fopen ("php://stdin","r");
+            $line = fgets($handle);
+            $this->domain_name = trim($line);
+
+        } else {
+
+            $this->domain_name = $_SERVER['argv'][2];
+        }
+
+
         $this->local_config = parse_ini_file(__DIR__ . "/config/config.local.ini", true);
         $this->config = parse_ini_file(__DIR__ . "/config/config.ini", true);
 
         $this->doc_root = $this->local_config[$this->os]['apache_doc_root'];
-        $this->domain_name = $this->config['virtual_host']['domain_name'];
         $this->target_path =  $this->doc_root . '/' . $this->domain_name;
 
         $this->db_pass = $this->generateRandomPassword(12,16);
@@ -66,7 +78,24 @@ class Setup {
         $this->makeWordPressConfig();
         $this->copyWordpress();
         $this->copyHtaccess();
+        $this->setPermissions();
         $this->restartServer();
+    }
+
+    private function setPermissions() {
+
+        echo "Setting Permissions\n";
+
+        $web_server_user = $this->local_config[$this->os]['web_server_user'];
+        $web_server_group = $this->local_config[$this->os]['web_server_group'];
+        $local_user = $this->local_config[$this->os]['local_user'];
+        $local_group = $this->local_config[$this->os]['local_group'];
+
+        echo shell_exec("find $this->target_path/. -type d -exec chmod 755 {} \;  2>&1");
+        echo shell_exec("find $this->target_path/. -type f -exec chmod 644 {} \;  2>&1");
+
+        echo shell_exec("chown $local_user:$local_group -R $this->target_path/*  2>&1");
+        echo shell_exec("chown $web_server_user:$web_server_group -R $this->target_path/wp-content  2>&1");
     }
 
     private function copyWordpress() {
