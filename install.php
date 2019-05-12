@@ -8,7 +8,6 @@ class Setup {
     private $os = PHP_OS;
 
     private $slug = '';
-    private $domain_name = '';
     private $download_path = __DIR__ . '/downloads';
     private $db_user = '';
     private $db_pass = '';
@@ -75,8 +74,10 @@ class Setup {
 
         echo "Creating Database\n";
 
+        echo shell_exec('mysql -e "CREATE DATABASE ' . $this->db_name . ';" -h' . $this->db_host . ' 2>&1;');
+
         echo shell_exec('mysql -e "CREATE USER \'' . $this->db_user  . '\'@\''. $this->db_host .
-            '\' IDENTIFIED BY \'' . $this->db_pass . '\'" -h' .$this->db_host . ' 2>&1;');
+            '\' IDENTIFIED BY \'' . $this->db_pass . '\';" -h' .$this->db_host . ' 2>&1;');
 
         echo shell_exec('mysql -e "GRANT ALL PRIVILEGES ON ' . $this->db_name . '.* TO \'' . $this->db_user .
             '\'@\'' . $this->db_host . '\' WITH GRANT OPTION;" -h' .$this->db_host . ' 2>&1;');
