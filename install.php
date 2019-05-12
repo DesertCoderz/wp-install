@@ -8,7 +8,9 @@ class Setup {
     private $os = PHP_OS;
 
     private $slug = '';
-
+    private $doc_root;
+    private $config;
+    private $local_config;
     private $target_path = '';
     private $domain_name = '';
     private $download_path = __DIR__ . '/downloads';
@@ -53,22 +55,34 @@ class Setup {
         $this->db_user = $this->slug . $this->createRandomNumber(6);
         $this->db_host = $this->config['database']['db_host'];
 
-        echo "password: "  . $this->db_pass . "\n";
-        echo "password utf8: "  . utf8_encode($this->db_pass) . "\n";
+        echo "Password: "  . $this->db_pass . "\n";
 
         $this->createVHost();
         $this->clearDownloadFolder();
         $this->downloadWP();
         $this->unzipWP();
         $this->createTargetPath();
-        // $this->createDatabase();
+        $this->createDatabase();
         $this->makeWordPressConfig();
+        $this->copyWordpress();
+        $this->copyHtaccess();
         $this->restartServer();
+    }
+
+    private function copyWordpress() {
+        echo "Copying WordPress files\n";
+        echo shell_exec("cp -r $this->download_path/wordpress/* $this->target_path 2>&1");
+    }
+
+    private function copyHtaccess() {
+        echo "Copying .htaccess file\n";
+        $htaccess_file_path = __DIR__  . "/templates/htaccess.conf";
+        echo shell_exec("cp $htaccess_file_path $this->target_path/.htaccess 2>&1");
     }
 
     private function createTargetPath() {
         echo "Creating Target Path\n";
-        echo shell_exec("cd $this->target_path 2>&1 && mkdir $this->domain_name 2>&1");
+        echo shell_exec("cd $this->doc_root 2>&1 && mkdir $this->domain_name 2>&1");
     }
 
     private function makeWordPressConfig() {
@@ -85,8 +99,7 @@ class Setup {
         $wp_config = str_replace("%DB_HOST%", $this->db_host, $wp_config);
         $wp_config = str_replace("%TABLE_PREFIX%", $this->config['wordpress']['table_prefix'], $wp_config);
 
-        file_put_contents($this->target_path . '/'.$this->config['wordpress']['domain_name'] .
-            '/wp-config.php', $wp_config);
+        file_put_contents($this->target_path . '/wp-config.php', $wp_config);
 
     }
 
@@ -94,7 +107,7 @@ class Setup {
 
         echo "Creating Database\n";
 
-        echo shell_exec('mysql -e "CREATE DATABASE ' . $this->db_name . ';" -h' . $this->db_host . ' 2>&1;');
+        echo shell_exec('mysql -e "CREATE DATABASE ' . $this->db_name . ' character set UTF8mb4;" -h' . $this->db_host . ' 2>&1;');
 
         echo shell_exec('mysql -e "CREATE USER \'' . $this->db_user  . '\'@\''. $this->db_host .
             '\' IDENTIFIED BY \'' . $this->db_pass . '\';" -h' .$this->db_host . ' 2>&1;');
@@ -120,16 +133,27 @@ class Setup {
         $desired_length = rand($start, $end);
 
         for($length = 0; $length < $desired_length; $length++) {
-            $password .= chr(rand(33, 126));
+            $password .= chr($this->getRandomNumber());
         }
 
         return $password;
     }
 
+    private function getRandomNumber() {
+
+        $number = rand(40, 126);
+
+        if ($number == 96) {
+            $number = $this->getRandomNumber();
+        }
+
+        return $number;
+    }
+
     private function unzipWP() {
 
         echo "Unzipping Worpress\n";
-        echo shell_exec("unzip -q $this->download_path/latest-de_DE.zip -d $this->download_path/ 2>&1;");
+        echo shell_exec("unzip -q $this->download_path/latest.zip -d $this->download_path/ 2>&1;");
     }
 
     private function clearDownloadFolder() {
@@ -142,7 +166,7 @@ class Setup {
 
         echo "Downloading Wordpress\n";
         $download_url = $this->config['wordpress']['download_url'];
-        echo shell_exec("wget -q -P $this->download_path $download_url 2>&1;");
+        echo shell_exec("wget -q -O $this->download_path/latest.zip $download_url 2>&1;");
     }
 
     private function createVHost() {
@@ -169,13 +193,11 @@ class Setup {
 
         echo "Creating Symbolic Link\n";
 
-        echo shell_exec("ln -s $available_path$vhost_config_filename $enabled_path$vhost_config_filename 2>&1;");
+        echo shell_exec("ln -s $available_path$vhost_config_filename $enabled_path$vhost_config_filename 2>&1");
     }
 
     private function restartServer() {
         echo "Restarting Apache\n";
-        exec("/etc/init.d/apache2 restart",$error,$out);
-        if ($error)
-            echo $out;
+        echo shell_exec("/etc/init.d/apache2 restart 2>&1");
     }
 }

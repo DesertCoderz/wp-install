@@ -34,7 +34,11 @@ define('DB_PASSWORD', '%DB_PASSWORD%');
 
 define('DB_HOST', '%DB_HOST%');
 
-define('DB_CHARSET', 'utf8');
+/**
+ * Der Datenbankzeichensatz, der beim Erstellen der
+ * Datenbanktabellen verwendet werden soll
+ */
+define( 'DB_CHARSET', 'utf8mb4' );
 
 /**#@+
  * Sicherheitsschlüssel
