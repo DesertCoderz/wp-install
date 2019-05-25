@@ -15,4 +15,4 @@
 ## Wordpress Hardening ##
 - Permissions
 
-For more detailed Information read my [article on the DesertCoders Website](https://www.desertcoderz.com/wordpress-cli-installer-for-linux-in-php/)
+For more detailed Information read my [article on the DesertCoderz Website](https://www.desertcoderz.com/wordpress-cli-installer-for-linux-in-php/)
