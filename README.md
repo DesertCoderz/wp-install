@@ -1,14 +1,13 @@
 # wp-install
 
-to dos:
+- run as root
+- 1rst parameter your project slug/nickname (only letters, dashes, numbers not at the beginning)
+- 2nd parameter the domain name of your project. i.E. desertcoderz.com
 
-## Virtual Host
-- create virtual host config files for apache 
-## Database
-- create password 
-- write credentials to wp-config
-## Wordpress
-- Wordpress config 
+```sudo ./wp-install myprojectname example.com```
+
+todo:
+
 ## Plugins
 - Automated plugin setup
 ## Wordpress Hardening

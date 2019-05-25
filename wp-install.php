@@ -67,8 +67,6 @@ class Setup {
         $this->db_user = $this->slug . $this->createRandomNumber(6);
         $this->db_host = $this->config['database']['db_host'];
 
-        echo "Password: "  . $this->db_pass . "\n";
-
         $this->createVHost();
         $this->clearDownloadFolder();
         $this->downloadWP();
@@ -172,6 +170,7 @@ class Setup {
 
         $number = rand(40, 126);
 
+        // Forward ticks not suitable for mysql passwords.
         if ($number == 96) {
             $number = $this->getRandomNumber();
         }
@@ -181,7 +180,7 @@ class Setup {
 
     private function unzipWP() {
 
-        echo "Unzipping Worpress\n";
+        echo "Unzipping Wordpress\n";
         echo shell_exec("unzip -q $this->download_path/latest.zip -d $this->download_path/ 2>&1;");
     }
 
