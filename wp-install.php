@@ -45,7 +45,7 @@ class Setup {
 
         if (empty($_SERVER['argv'][2])) {
 
-            echo "Please enter the project's domain name as second parameter without protocoll (http://)";
+            echo "Please enter the project's domain name as second parameter without protocol (http://)";
             $handle = fopen ("php://stdin","r");
             $line = fgets($handle);
             $this->domain_name = trim($line);
