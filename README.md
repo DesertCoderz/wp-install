@@ -1,14 +1,16 @@
-# wp-install
+# wp-install #
+
+- set execute permissions for wp-script.php ```chmod u+x ./wp-script.php```
 
 - run as root
 - 1rst parameter your project slug/nickname (only letters, dashes, numbers not at the beginning)
 - 2nd parameter the domain name of your project. i.E. desertcoderz.com
 
-```sudo ./wp-install myprojectname example.com```
+```sudo ./wp-install.php myprojectname example.com```
 
-todo:
+# todo: #
 
-## Plugins
+## Plugins ##
 - Automated plugin setup
-## Wordpress Hardening
+## Wordpress Hardening ##
 - Permissions
