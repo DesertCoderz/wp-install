@@ -1,4 +1,4 @@
-# wp-install #
+# WordPress shell command installer #
 
 - set execute permissions for wp-script.php ```chmod u+x ./wp-script.php```
 
@@ -15,4 +15,4 @@
 ## Wordpress Hardening ##
 - Permissions
 
-For more detailed Information read my [article on the DesertCoderz Website](https://www.desertcoderz.com/wordpress-cli-installer-for-linux-in-php/)
+For more detailed Information read my [article on the DesertCoderz Website](https://www.desertcoderz.com/wordpress-shell-command-installer/)
