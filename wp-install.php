@@ -5,8 +5,9 @@ $s = new Setup();
 
 class Setup {
 
-    private $os = PHP_OS;
+    const FORWARD_TICK_ASCII_CODE = 96;
 
+    private $os = PHP_OS;
     private $slug = '';
     private $doc_root;
     private $config;
@@ -171,7 +172,7 @@ class Setup {
         $number = rand(40, 126);
 
         // Forward ticks not suitable for mysql passwords.
-        if ($number == 96) {
+        if ($number == self::FORWARD_TICK_ASCII_CODE) {
             $number = $this->getRandomNumber();
         }
 
