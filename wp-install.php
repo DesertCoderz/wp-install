@@ -213,7 +213,7 @@ class Setup {
             $this->local_config[$this->os]['apache_doc_root'] , $vhost_template);
 
         $vhost_template = str_replace("%DOMAIN_NAME%",
-            $this->config['virtual_host']['domain_name'], $vhost_template);
+            $this->domain_name, $vhost_template);
 
         $vhost_template = str_replace("%WEBMASTER_EMAIL%",
             $this->config['virtual_host']['webmaster_email'], $vhost_template);
